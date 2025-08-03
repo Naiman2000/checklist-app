@@ -1,6 +1,9 @@
 import { Component, OnInit } from '@angular/core';
+import { Firestore, collection, collectionData, addDoc, updateDoc, deleteDoc, doc } from '@angular/fire/firestore';
+import { Observable } from 'rxjs';
 
 interface Task {
+  id?: string;
   name: string;
   description: string;
   done: boolean;
@@ -11,16 +14,14 @@ interface Task {
 @Component({
   selector: 'app-root',
   templateUrl: './app.component.html',
-  styleUrls: ['./app.component.scss'], // adjust extension if you use css
+  styleUrls: ['./app.component.scss'],
 })
 export class AppComponent implements OnInit {
   title = 'checklist-app';
-
   tasks: Task[] = [];
-  currentCategory = 'All';
+  currentCategory: string = 'All';
   editTaskIndex: number | null = null;
-
-  isModalOpen = false;
+  categories = ['All', 'Personal', 'Work'];
 
   modalTask: { name: string; description: string; deadline: string } = {
     name: '',
@@ -28,12 +29,20 @@ export class AppComponent implements OnInit {
     deadline: '',
   };
 
+  isModalOpen = false;
   isDarkMode = false;
 
-  categories = ['All', 'Personal', 'Work'];
+  constructor(private firestore: Firestore) {}
 
   ngOnInit(): void {
-    // Initially nothing to do or load
+    this.loadTasks();
+  }
+
+  loadTasks(): void {
+    const tasksCollection = collection(this.firestore, 'tasks');
+    collectionData(tasksCollection, { idField: 'id' }).subscribe((data) => {
+      this.tasks = data as Task[];
+    });
   }
 
   showModal(editIndex: number | null = null): void {
@@ -56,40 +65,45 @@ export class AppComponent implements OnInit {
     this.isModalOpen = false;
   }
 
-  submitTask(): void {
+  async submitTask(): Promise<void> {
     const name = this.modalTask.name.trim();
-    if (!name) return; // simple validation
+    if (!name) return;
 
     const description = this.modalTask.description || '';
     const deadline = this.modalTask.deadline || '';
 
+    const newTask: Omit<Task, 'id'> = {
+      name,
+      description,
+      done: false,
+      category: this.currentCategory === 'All' ? 'Personal' : this.currentCategory,
+      deadline,
+    };
+
     if (this.editTaskIndex !== null) {
-      // Update existing task
-      this.tasks[this.editTaskIndex] = {
-        ...this.tasks[this.editTaskIndex],
-        name,
-        description,
-        deadline,
-      };
+      const task = this.tasks[this.editTaskIndex];
+      const taskRef = doc(this.firestore, `tasks/${task.id}`);
+      await updateDoc(taskRef, newTask as any);
     } else {
-      // Add new task with current category
-      this.tasks.push({
-        name,
-        description,
-        done: false,
-        category: this.currentCategory === 'All' ? 'Personal' : this.currentCategory, // default category, avoid "All"
-        deadline,
-      });
+      const tasksCollection = collection(this.firestore, 'tasks');
+      await addDoc(tasksCollection, newTask);
     }
+
     this.closeModal();
   }
 
-  toggleTask(index: number): void {
-    this.tasks[index].done = !this.tasks[index].done;
+  async toggleTask(index: number): Promise<void> {
+    const task = this.tasks[index];
+    const taskRef = doc(this.firestore, `tasks/${task.id}`);
+    await updateDoc(taskRef, { done: !task.done });
   }
 
-  deleteTask(index: number): void {
-    this.tasks.splice(index, 1);
+  async deleteTask(index: number): Promise<void> {
+    const task = this.tasks[index];
+    if (task.id) {
+      const taskRef = doc(this.firestore, `tasks/${task.id}`);
+      await deleteDoc(taskRef);
+    }
   }
 
   switchCategory(category: string): void {
@@ -119,5 +133,9 @@ export class AppComponent implements OnInit {
     const today = new Date();
     const d = new Date(deadline + 'T23:59:59');
     return d.getTime() < today.getTime();
+  }
+
+  editTask(index: number): void {
+    this.showModal(index);
   }
 }
