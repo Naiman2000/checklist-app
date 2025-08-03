@@ -5,7 +5,6 @@
   --border: #ccc;
 }
 
-/* When 'dark' class applied on container */
 .dark {
   --bg: #2e2e2e;
   --text: #ffffff;
@@ -35,8 +34,8 @@
 }
 
 .section-border {
-  border-top: 1.5px solid var(--border);
-  border-bottom: 1.5px solid var(--border);
+  border-top: 1.5px solid #999;
+  border-bottom: 1.5px solid #999;
   padding: 0.75rem 0;
   margin-bottom: 3rem;
 }
@@ -79,7 +78,7 @@
   background-color: #000;
   color: #fff;
   border: none;
-  cursor: pointer;
+  cursor: not-allowed;
 }
 
 body.dark #addBtn {
@@ -100,7 +99,7 @@ body.dark #submitTaskBtn {
 
 .task-section-divider {
   border: none;
-  border-top: 1px solid var(--border);
+  border-top: 1px solid #999;
   margin: 1rem 0;
 }
 
@@ -109,7 +108,7 @@ body.dark #submitTaskBtn {
   justify-content: space-between;
   align-items: flex-start;
   padding: 0.75rem 0;
-  border-bottom: 1px solid var(--border);
+  border-bottom: 1px solid #999;
 }
 
 #taskList li:last-child {
@@ -124,7 +123,7 @@ body.dark #submitTaskBtn {
 
 .deadline {
   font-size: 0.85rem;
-  margin-left: 0.6rem;
+  margin-left: 0;
   font-weight: bold;
   padding: 0 0.3rem;
   border-radius: 4px;
@@ -182,7 +181,7 @@ li span:first-child {
   background-color: rgba(0, 0, 0, 0.5);
   justify-content: center;
   align-items: center;
-  display: none; /* toggled by Angular */
+  display: none; 
 }
 
 .modal[style*="display: flex"] {
@@ -190,7 +189,7 @@ li span:first-child {
 }
 
 .modal-content {
-  background-color: var(--box);
+  background-color: #f0f0f0;
   color: var(--text);
   padding: 1rem;
   border-radius: 5px;

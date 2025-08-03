@@ -32,10 +32,16 @@
         [class.completed]="task.done"
       >
         <div style="flex: 1;">
-          <span (click)="toggleTask(i)" class="task-name">{{ task.name }}</span>
+          <span (click)="toggleTask(i)" 
+                [class.completed]="task.done"
+                >{{ task.name }}
+                  <small *ngIf="currentCategory === 'All'" style="margin-left: 0.5rem; color: gray; font-weight: normal; font-size: 0.85rem;">
+                  ({{ task.category }})
+                  </small>
+          </span>
 
           <button
-            (click)="showModal(i)"
+            (click)="showModal(i)" 
             style="cursor: pointer; background: none; border: none; color: #007bff; font-size: 1rem;"
           >
             ✏️ Edit
@@ -60,8 +66,7 @@
       </li>
     </ul>
 
-    <!-- Modal -->
-    <div class="modal" [ngStyle]="{ display: isModalOpen ? 'flex' : 'none' }">
+    <div class="modal" [ngStyle]="{ display: isModalOpen ? 'flex' : 'none' }"> 
       <div class="modal-content">
         <h3 style="text-align: center;">
           {{ editTaskIndex !== null ? 'Edit Task' : 'New Task' }}
@@ -91,7 +96,14 @@
           />
 
           <button (click)="closeModal()">Cancel</button>
-          <button (click)="submitTask()">
+          <button 
+            (click)="submitTask()"
+            [ngStyle]="{
+              'background-color': (modalTask.name.trim() && modalTask.deadline) ? '#000' : '#ccc',
+              'color': (modalTask.name.trim() && modalTask.deadline) ? '#fff' : '#888',
+              'cursor': (modalTask.name.trim() && modalTask.deadline) ? 'pointer' : 'not-allowed'
+             }"
+          > 
             {{ editTaskIndex !== null ? 'Save' : 'Add' }}
           </button>
         </div>

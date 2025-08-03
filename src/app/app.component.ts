@@ -46,6 +46,12 @@ export class AppComponent implements OnInit {
   }
 
   showModal(editIndex: number | null = null): void {
+
+    if (editIndex === null && this.currentCategory === "All") {
+      alert("Please select either 'Personal' or 'Work' tab to add a new task.");
+      return;
+    }
+
     this.isModalOpen = true;
     if (editIndex !== null) {
       this.editTaskIndex = editIndex;
@@ -67,10 +73,19 @@ export class AppComponent implements OnInit {
 
   async submitTask(): Promise<void> {
     const name = this.modalTask.name.trim();
-    if (!name) return;
-
     const description = this.modalTask.description || '';
     const deadline = this.modalTask.deadline || '';
+
+      if (!name && !deadline) {
+        alert("Please enter both a 'Task Title' and a 'Deadline'.");
+        return;
+      } else if (!name) {
+        alert("Please enter a 'Task Title'.");
+        return;
+      } else if (!deadline) {
+        alert("Please enter a 'Deadline'.");
+        return;
+      }
 
     const newTask: Omit<Task, 'id'> = {
       name,
