@@ -1,0 +1,226 @@
+:root {
+  --bg: #ffffff;
+  --text: #000000;
+  --box: #f0f0f0;
+  --border: #ccc;
+}
+
+/* When 'dark' class applied on container */
+.dark {
+  --bg: #2e2e2e;
+  --text: #ffffff;
+  --box: #444;
+  --border: #888;
+}
+
+:host {
+  display: block;
+  font-family: sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  margin: 0;
+  padding: 2rem;
+  transition: all 0.3s ease;
+  min-height: 100vh;
+}
+
+.container {
+  border: 1px solid #ddd;
+  padding: 0.8rem;
+  border-radius: 8px;
+  max-width: 100%;
+  margin: 2rem auto;
+  box-shadow: 0 0 15px rgba(0, 0, 0, 0.05);
+  background-color: var(--box);
+}
+
+.section-border {
+  border-top: 1.5px solid var(--border);
+  border-bottom: 1.5px solid var(--border);
+  padding: 0.75rem 0;
+  margin-bottom: 3rem;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.tabs {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.tabs button {
+  padding: 0.5rem 1rem;
+  border: none;
+  background: var(--box);
+  color: var(--text);
+  cursor: pointer;
+}
+
+.tabs button.active {
+  border-bottom: 3px solid gray;
+  font-weight: bold;
+}
+
+#taskInput {
+  width: 70%;
+  padding: 0.5rem;
+}
+
+#addBtn,
+#submitTaskBtn {
+  padding: 0.5rem 1rem;
+  font-weight: bold;
+  background-color: #000;
+  color: #fff;
+  border: none;
+  cursor: pointer;
+}
+
+body.dark #addBtn {
+  background-color: #fff;
+  color: #000;
+}
+
+body.dark #submitTaskBtn {
+  background-color: #fff;
+  color: #000;
+}
+
+#taskList {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.task-section-divider {
+  border: none;
+  border-top: 1px solid var(--border);
+  margin: 1rem 0;
+}
+
+#taskList li {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  padding: 0.75rem 0;
+  border-bottom: 1px solid var(--border);
+}
+
+#taskList li:last-child {
+  border-bottom: none;
+}
+
+.input-group {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.deadline {
+  font-size: 0.85rem;
+  margin-left: 0.6rem;
+  font-weight: bold;
+  padding: 0 0.3rem;
+  border-radius: 4px;
+  display: inline-block;
+  cursor: pointer;
+}
+
+.overdue {
+  background-color: #f44336;
+  color: white;
+}
+
+.due-today {
+  background-color: #ff9800;
+  color: white;
+}
+
+ul {
+  list-style: none;
+  padding: 0;
+}
+
+li {
+  margin: 0.5rem 0;
+  padding: 0.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  justify-content: space-between;
+}
+
+li span:first-child {
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.completed {
+  text-decoration: line-through;
+  color: gray;
+}
+
+.trash {
+  cursor: pointer;
+  color: red;
+  align-self: flex-end;
+}
+
+.modal {
+  position: fixed;
+  z-index: 99;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  justify-content: center;
+  align-items: center;
+  display: none; /* toggled by Angular */
+}
+
+.modal[style*="display: flex"] {
+  display: flex;
+}
+
+.modal-content {
+  background-color: var(--box);
+  color: var(--text);
+  padding: 1rem;
+  border-radius: 5px;
+  width: 300px;
+  box-shadow: 0 0 10px #00000070;
+  display: flex;
+  flex-direction: column;
+}
+
+.modal-content input,
+.modal-content textarea {
+  width: 93%;
+  padding: 0.5rem;
+  margin-bottom: 0.5rem;
+  resize: vertical;
+  min-height: 100%;
+  max-height: 150px;
+}
+
+.description {
+  width: 100%;
+  resize: vertical;
+  overflow-wrap: break-word;
+  word-wrap: break-word;
+  word-break: break-word;
+  box-sizing: border-box;
+}
+
+.modal-content button {
+  margin-right: 0.5rem;
+  padding: 0.5rem 1rem;
+  cursor: pointer;
+}

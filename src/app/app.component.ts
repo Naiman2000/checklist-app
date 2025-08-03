@@ -11,146 +11,113 @@ interface Task {
 @Component({
   selector: 'app-root',
   templateUrl: './app.component.html',
-  styleUrls: ['./app.component.scss'],
+  styleUrls: ['./app.component.scss'], // adjust extension if you use css
 })
 export class AppComponent implements OnInit {
   title = 'checklist-app';
+
   tasks: Task[] = [];
-  currentCategory: string = 'All';
+  currentCategory = 'All';
   editTaskIndex: number | null = null;
 
+  isModalOpen = false;
+
+  modalTask: { name: string; description: string; deadline: string } = {
+    name: '',
+    description: '',
+    deadline: '',
+  };
+
+  isDarkMode = false;
+
+  categories = ['All', 'Personal', 'Work'];
+
   ngOnInit(): void {
-    this.renderTasks();
+    // Initially nothing to do or load
   }
 
   showModal(editIndex: number | null = null): void {
-    const input = document.getElementById('modalTaskInput') as HTMLInputElement;
-    const desc = document.getElementById('modalDescription') as HTMLInputElement;
-    const deadlineInput = document.getElementById('modalDeadline') as HTMLInputElement;
-
+    this.isModalOpen = true;
     if (editIndex !== null) {
       this.editTaskIndex = editIndex;
       const task = this.tasks[editIndex];
-      input.value = task.name;
-      desc.value = task.description;
-      deadlineInput.value = task.deadline || '';
-      (document.getElementById('submitTaskBtn') as HTMLButtonElement).innerText = 'Save';
+      this.modalTask = {
+        name: task.name,
+        description: task.description,
+        deadline: task.deadline || '',
+      };
     } else {
       this.editTaskIndex = null;
-      input.value = '';
-      desc.value = '';
-      deadlineInput.value = '';
-      (document.getElementById('submitTaskBtn') as HTMLButtonElement).innerText = 'Add';
+      this.modalTask = { name: '', description: '', deadline: '' };
     }
-
-    (document.getElementById('taskModal') as HTMLElement).style.display = 'flex';
   }
 
   closeModal(): void {
-    (document.getElementById('taskModal') as HTMLElement).style.display = 'none';
+    this.isModalOpen = false;
   }
 
   submitTask(): void {
-    const input = document.getElementById('modalTaskInput') as HTMLInputElement;
-    const desc = document.getElementById('modalDescription') as HTMLInputElement;
-    const deadlineInput = document.getElementById('modalDeadline') as HTMLInputElement;
+    const name = this.modalTask.name.trim();
+    if (!name) return; // simple validation
 
-    const name = input.value.trim();
-    const description = desc.value.trim();
-    const deadline = deadlineInput.value;
-
-    if (!name) return;
+    const description = this.modalTask.description || '';
+    const deadline = this.modalTask.deadline || '';
 
     if (this.editTaskIndex !== null) {
-      const task = this.tasks[this.editTaskIndex];
-      task.name = name;
-      task.description = description;
-      task.deadline = deadline;
+      // Update existing task
+      this.tasks[this.editTaskIndex] = {
+        ...this.tasks[this.editTaskIndex],
+        name,
+        description,
+        deadline,
+      };
     } else {
+      // Add new task with current category
       this.tasks.push({
         name,
         description,
         done: false,
-        category: this.currentCategory,
+        category: this.currentCategory === 'All' ? 'Personal' : this.currentCategory, // default category, avoid "All"
         deadline,
       });
     }
-
     this.closeModal();
-    this.renderTasks();
   }
 
   toggleTask(index: number): void {
     this.tasks[index].done = !this.tasks[index].done;
-    this.renderTasks();
   }
 
   deleteTask(index: number): void {
     this.tasks.splice(index, 1);
-    this.renderTasks();
   }
 
-  switchCategory(cat: string): void {
-    this.currentCategory = cat;
-    document.querySelectorAll('.tabs button').forEach((btn) => btn.classList.remove('active'));
-    const btn = Array.from(document.querySelectorAll('.tabs button')).find(
-      (b) => b.textContent === cat
-    );
-    if (btn) btn.classList.add('active');
-    this.renderTasks();
+  switchCategory(category: string): void {
+    this.currentCategory = category;
   }
 
-  renderTasks(): void {
-    const list = document.getElementById('taskList') as HTMLElement;
-    if (!list) return;
-    list.innerHTML = '';
-
-    const filteredTasks = this.tasks
-      .map((task, index) => ({ task, index }))
-      .filter(({ task }) => this.currentCategory === 'All' || task.category === this.currentCategory);
-
-    filteredTasks.forEach(({ task, index }) => {
-      const li = document.createElement('li');
-
-      let deadlineDisplay = '';
-      let deadlineClass = '';
-
-      if (task.deadline) {
-        const today = new Date();
-        const deadlineDate = new Date(task.deadline + 'T23:59:59');
-        const diffTime = deadlineDate.getTime() - today.getTime();
-        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-
-        if (diffDays < 0) {
-          deadlineClass = 'overdue';
-        } else if (diffDays === 0) {
-          deadlineClass = 'due-today';
-        }
-
-        deadlineDisplay = `<span class="deadline ${deadlineClass}">Due: ${task.deadline}</span>`;
-      }
-
-      li.innerHTML = `
-        <div style="flex: 1;">
-          <span (click)="toggleTask(${index})" class="${task.done ? 'completed' : ''}">${task.name}</span>
-          <button (click)="editTask(${index})" style="cursor: pointer; background: none; border: none; color: #007bff; font-size: 1rem;">✏️ Edit</button>
-          <div>${deadlineDisplay}</div>
-          <div class="description">${task.description || ''}</div>
-        </div>
-        <span class="trash" (click)="deleteTask(${index})">🗑️</span>
-      `;
-      list.appendChild(li);
-    });
-  }
-
-  editTask(index: number): void {
-    this.showModal(index);
+  filteredTasks(): Task[] {
+    if (this.currentCategory === 'All') return this.tasks;
+    return this.tasks.filter((task) => task.category === this.currentCategory);
   }
 
   toggleDarkMode(): void {
-    document.body.classList.toggle('dark');
-    const isDark = document.body.classList.contains('dark');
-    const btn = document.getElementById('modeToggleBtn') as HTMLElement;
-    btn.innerText = isDark ? '☀️ Light Mode' : '🌙 Dark Mode';
+    this.isDarkMode = !this.isDarkMode;
+  }
+
+  isDueToday(deadline: string): boolean {
+    const today = new Date();
+    const d = new Date(deadline + 'T23:59:59');
+    return (
+      d.getFullYear() === today.getFullYear() &&
+      d.getMonth() === today.getMonth() &&
+      d.getDate() === today.getDate()
+    );
+  }
+
+  isOverdue(deadline: string): boolean {
+    const today = new Date();
+    const d = new Date(deadline + 'T23:59:59');
+    return d.getTime() < today.getTime();
   }
 }
