@@ -31,12 +31,7 @@ export class AppComponent implements OnInit {
 
   isModalOpen = false;
   isDarkMode = false;
-  
-  //For quick input
-  quickTaskName: string='';
 
-  //For checkbox selection
-  selectedTasks: Set<string> = new Set();
   constructor(private firestore: Firestore) {}
 
   ngOnInit(): void {
@@ -47,7 +42,6 @@ export class AppComponent implements OnInit {
     const tasksCollection = collection(this.firestore, 'tasks');
     collectionData(tasksCollection, { idField: 'id' }).subscribe((data) => {
       this.tasks = data as Task[];
-      this.selectedTasks.clear();
     });
   }
 
@@ -113,24 +107,6 @@ export class AppComponent implements OnInit {
     this.closeModal();
   }
 
-  async quickAddTask(): Promise<void> {
-    const name = this.quickTaskName.trim();
-    if(!name) return;
-    if(this.currentCategory === "All") {
-      alert("Please select 'Personal' or 'Work' to add a new task.");
-      return;
-    }
-    const newTask: Omit<Task, 'id'> ={
-      name,
-      description: '',
-      done: false,
-      category: this.currentCategory,
-      deadline: '',
-    };
-    const tasksCollection= collection(this.firestore, 'tasks');
-    await addDoc(tasksCollection, newTask);
-    this.quickTaskName = '';
-  }
   async toggleTask(index: number): Promise<void> {
     const task = this.tasks[index];
     const taskRef = doc(this.firestore, `tasks/${task.id}`);
@@ -177,48 +153,4 @@ export class AppComponent implements OnInit {
   editTask(index: number): void {
     this.showModal(index);
   }
-
-  // Delete all selected tasks
-  async deleteAllSelectedTasks(): Promise<void>{
-    if (this.selectedTasks.size === 0) return;
-
-    const confirmDelete = confirm('Are you sure want to delete all selected tasks?');
-    if (!confirmDelete) return;
-
-    const deletePromises = Array.from(this.selectedTasks).map(taskId => {
-      const taskRef = doc(this.firestore, `tasks/${taskId}`);
-      return deleteDoc(taskRef);
-    });
-
-    await Promise.all(deletePromises);
-    this.selectedTasks.clear();
-  }
-
-  //Checkbox logic
-  toggleTaskSelection(taskId: string | undefined): void{
-    if (!taskId) return;
-    if (this.selectedTasks.has(taskId)){
-      this.selectedTasks.delete(taskId);
-    }else{
-      this.selectedTasks.add(taskId);
-    }
-  }
-
-  toggleSelectAll(checked: boolean): void{
-    if(checked){
-      this.filteredTasks().forEach(task => {
-        if (task.id) this.selectedTasks.add(task.id);
-      });
-    }else{
-      this.filteredTasks().forEach(task =>{
-        if (task.id) this.selectedTasks.delete(task.id);
-      });
-    }
-  }
-
-  allSelected(): boolean {
-    const filtered = this.filteredTasks().filter(t => t.id);
-    return filtered.length > 0 && filtered.every(task => this.selectedTasks.has(task.id!));
-  }
-  
 }
