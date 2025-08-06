@@ -78,6 +78,11 @@
                   </small>
           </span>
 
+          <span *ngIf="(isDueToday(task.deadline) || isOverdue(task.deadline)) && !task.reminderDismissed && !task.done" style="margin-left:8px;">
+            <img src="assets/bell.png" class="bell-icon" title="Task is due/overdue!" width="22" height="22" />
+            <button class="dismiss-btn" (click)="dismissReminder(task)">Dismiss</button>
+          </span>
+
           <button
             (click)="showModal(i)" 
             style="cursor: pointer; background: none; border: none; color: #007bff; font-size: 1rem;"

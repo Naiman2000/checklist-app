@@ -9,6 +9,8 @@ interface Task {
   done: boolean;
   category: string;
   deadline?: string;
+  notified?: boolean;
+  reminderDismissed?: boolean;
 }
 
 @Component({
@@ -41,6 +43,8 @@ export class AppComponent implements OnInit {
 
   ngOnInit(): void {
     this.loadTasks();
+    this.requestNotificationPermission();
+    this.startDueTaskChecker();
   }
 
   loadTasks(): void {
@@ -220,5 +224,53 @@ export class AppComponent implements OnInit {
     const filtered = this.filteredTasks().filter(t => t.id);
     return filtered.length > 0 && filtered.every(task => this.selectedTasks.has(task.id!));
   }
-  
+
+/**
+ * Notification Part
+ * hehehe hai whoever reading this
+ */
+requestNotificationPermission() {
+  if ('Notification' in window) {
+    Notification.requestPermission();
+  }
+}
+
+// Deadline Checker
+startDueTaskChecker() {
+  setInterval(() => {
+    const now = new Date();
+    this.tasks.forEach(task => {
+      // Deadline notify
+      if (task.deadline && !task.done && !task.notified) {
+        const due = new Date(task.deadline + 'T23:59:59');
+        if (now >= due) {
+          this.sendDueNotification(task);
+          task.notified = true;
+        }
+      }
+    });
+  }, 60 * 1000); // every 1 minute
+}
+
+// Show the notification
+sendDueNotification(task: Task) {
+  if ('Notification' in window && Notification.permission === 'granted') {
+    new Notification(`Task Due: ${task.name}`, {
+      body: task.description || 'You have a task due!',
+      icon: 'assets/bell.png'
+    });
+  }
+}
+
+// Dismiss
+async dismissReminder(task: Task): Promise<void> {
+  task.reminderDismissed = true;
+  // Save logic, will stay even refresh
+  if (task.id) {
+    const taskRef = doc(this.firestore, `tasks/${task.id}`);
+    await updateDoc(taskRef, { reminderDismissed: true });
+  }
+}
+
+
 }
