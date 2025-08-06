@@ -18,10 +18,32 @@
     </div>
 
     <hr class="task-section-divider" />
-
     <div class="input-group" style="display: flex; gap: 0.5rem;">
       <input placeholder="Add a new task" disabled style="flex: 1" />
       <button id="addBtn" (click)="showModal()">Add</button>
+    </div>
+
+    <!-- Select All Checkbox and Delete All Trash BELOW -->
+    <div style="margin: 0.5rem 0; display: flex; flex-direction: column; align-items: flex-start;">
+      <div style="display: flex; align-items: center;">
+        <input
+          type="checkbox"
+          id="selectAll"
+          #selectAllBox
+          [checked]="allSelected()"
+          (change)="toggleSelectAll(selectAllBox.checked)"
+        />
+        <label for="selectAll" style="margin-left: 0.5rem;">Select All</label>
+      </div>
+      <span 
+        class="trash;;"
+        style="margin-top: 0.75rem; margin-left: 0.25rem; cursor: pointer; font-size: 1.2rem; color: {{ allSelected() ? 'red' : '#ccc' }};"
+        [class.disabled]="!allSelected()"
+        (click)="deleteAllSelectedTasks()"
+        [title]="allSelected() ? 'Delete all selected tasks' : 'Select all to enable delete'"
+      >
+      🗑️
+      </span>
     </div>
 
     <hr class="task-section-divider" />
@@ -30,7 +52,17 @@
       <li
         *ngFor="let task of filteredTasks(); let i = index"
         [class.completed]="task.done"
+        style="display: flex; align-items: flex-start;"
       >
+
+      <!--Task Checkbox-->
+      <input 
+        type="checkbox"
+        [checked]="selectedTasks.has(task.id || '')"
+        (change)="toggleTaskSelection(task.id || '')"
+        style="margin-right: 0.5rem; margin-top: 0.5rem"
+        />
+
         <div style="flex: 1;">
           <span (click)="toggleTask(i)" 
                 [class.completed]="task.done"
