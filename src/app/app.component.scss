@@ -225,3 +225,7 @@ li span:first-child {
   padding: 0.5rem 1rem;
   cursor: pointer;
 }
+
+#selectAll + label{
+  color: var(--text);
+}
