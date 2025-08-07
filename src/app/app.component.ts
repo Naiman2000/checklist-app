@@ -11,6 +11,7 @@ interface Task {
   deadline?: string;
   notified?: boolean;
   reminderDismissed?: boolean;
+  reminderFrequency?: string;
 }
 
 @Component({
@@ -25,10 +26,11 @@ export class AppComponent implements OnInit {
   editTaskIndex: number | null = null;
   categories = ['All', 'Personal', 'Work'];
 
-  modalTask: { name: string; description: string; deadline: string } = {
+  modalTask: { name: string; description: string; deadline: string; reminderFrequency: string; } = {
     name: '',
     description: '',
     deadline: '',
+    reminderFrequency: 'once',
   };
 
   isModalOpen = false;
@@ -70,10 +72,11 @@ export class AppComponent implements OnInit {
         name: task.name,
         description: task.description,
         deadline: task.deadline || '',
+        reminderFrequency: task.reminderFrequency || 'Once',
       };
     } else {
       this.editTaskIndex = null;
-      this.modalTask = { name: '', description: '', deadline: '' };
+      this.modalTask = { name: '', description: '', deadline: '',reminderFrequency: 'Once' };
     }
   }
 
@@ -103,6 +106,7 @@ export class AppComponent implements OnInit {
       done: false,
       category: this.currentCategory === 'All' ? 'Personal' : this.currentCategory,
       deadline,
+      reminderFrequency: this.modalTask.reminderFrequency,
     };
 
     if (this.editTaskIndex !== null) {
@@ -271,6 +275,5 @@ async dismissReminder(task: Task): Promise<void> {
     await updateDoc(taskRef, { reminderDismissed: true });
   }
 }
-
 
 }

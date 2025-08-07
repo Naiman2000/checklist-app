@@ -138,6 +138,17 @@
             [(ngModel)]="modalTask.deadline"
           />
 
+          <div style="margin-top: 0.5rem;">
+            <label for="reminderFrequency">Reminder alert:</label>
+            <select id="reminderFrequency" [(ngModel)]="modalTask.reminderFrequency">
+              <option value="once">Once (on deadline)</option>
+              <option value="daily">Daily until done</option>
+              <option value="weekly">Weekly until done</option>
+              <option value="none">No reminder</option>
+            </select>
+          </div>
+
+
           <button (click)="closeModal()">Cancel</button>
           <button 
             (click)="submitTask()"
