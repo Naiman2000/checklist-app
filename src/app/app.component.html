@@ -1,6 +1,12 @@
 <div [ngClass]="{ dark: isDarkMode }" class="container">
   <div class="header">
-    <h2>Checklist</h2>
+    <h2>
+      Checklist
+      <link
+        rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+        crossorigin="anonymous"/>
+    </h2>
     <button id="modeToggleBtn" (click)="toggleDarkMode()">
       {{ isDarkMode ? '☀️ Light Mode' : '🌙 Dark Mode' }}
     </button>
@@ -11,8 +17,7 @@
       <button
         *ngFor="let cat of categories"
         (click)="switchCategory(cat)"
-        [class.active]="cat === currentCategory"
-      >
+        [class.active]="cat === currentCategory">
         {{ cat }}
       </button>
     </div>
@@ -23,93 +28,107 @@
       <button id="addBtn" (click)="showModal()">Add</button>
     </div>
 
-    <!-- Select All Checkbox and Delete All Trash BELOW -->
+    <hr class="task-section-divider" />
     <div style="margin: 0.5rem 0; display: flex; flex-direction: column; align-items: flex-start;">
-      <div style="display: flex; align-items: center;">
+      <div style="display: flex; gap: 0.5rem; flex: 1; align-items: flex-start;">
         <input
           type="checkbox"
           id="selectAll"
           #selectAllBox
           [checked]="allSelected()"
           (change)="toggleSelectAll(selectAllBox.checked)"
-        />
-        <label for="selectAll" style="margin-left: 0.5rem;">Select All</label>
+          style="width: 18px; height: 18px; cursor: pointer;"/>
+        <label for="selectAll" style="cursor: pointer; user-select: none; color: var(--text);">
+          Select All
+        </label>
+
+        <i
+          class="fa-solid fa-trash trash-icon"
+          *ngIf="selectedTasks.size > 0"
+          (click)="deleteAllSelectedTasks()"
+          title="Delete selected task(s)"
+          [style.color]="selectedTasks.size > 0 ? 'red' : 'var(--text)'"
+          style="cursor: pointer; font-size: 20px; margin-left: 12px;"
+        ></i>
       </div>
-      <span 
-        class="trash"
-        [ngStyle]="{
-          'margin-top': '0.75rem',
-          'margin-left': '0.25rem',
-          'cursor': 'pointer',
-          'font-size': '1.2rem',
-          'color': allSelected() ? 'red' : 'var(--text)'
-        }"
-        [class.disabled]="!allSelected()"
-        (click)="deleteAllSelectedTasks()"
-        [title]="allSelected() ? 'Delete all selected tasks' : 'Select all to enable delete'"
-      >
-      🗑️
-      </span>
     </div>
 
     <hr class="task-section-divider" />
-
     <ul id="taskList">
       <li
         *ngFor="let task of filteredTasks(); let i = index"
-        [class.completed]="task.done"
-        style="display: flex; align-items: flex-start;"
-      >
-
-      <!--Task Checkbox-->
-      <input 
-        type="checkbox"
-        [checked]="selectedTasks.has(task.id || '')"
-        (change)="toggleTaskSelection(task.id || '')"
-        style="margin-right: 0.5rem; margin-top: 0.5rem"
-        />
+        style="display: flex; justify-content: space-between; align-items: flex-start; padding: 0.75rem 0;">
+        <input
+          type="checkbox"
+          [checked]="selectedTasks.has(task.id || '')"
+          (change)="toggleTaskSelection(task.id || '')"
+          style="margin-right: 0.5rem; margin-top: 0.5rem"/>
 
         <div style="flex: 1;">
-          <span (click)="toggleTask(i)" 
-                [class.completed]="task.done"
-                >{{ task.name }}
-                  <small *ngIf="currentCategory === 'All'" style="margin-left: 0.5rem; color: gray; font-weight: normal; font-size: 0.85rem;">
-                  ({{ task.category }})
-                  </small>
+          <span
+            (click)="!isOverdue(task.deadline || '') && !areAllRemindersNotified(task) && toggleTask(i)"
+            [class.completed]="areAllRemindersNotified(task)"
+            [style.cursor]="(isOverdue(task.deadline || '') || areAllRemindersNotified(task)) ? 'default' : 'pointer'">
+            {{ task.name }}
+            <small
+              *ngIf="currentCategory === 'All'"
+              style="margin-left: 0.5rem; color: rgb(209, 204, 204); font-weight: normal; font-size: 0.85rem;"
+              >( {{ task.category }} )</small
+            >
           </span>
 
-          <span *ngIf="(isDueToday(task.deadline || '') || isOverdue(task.deadline || '')) && !task.reminderDismissed && !task.done" style="margin-left:8px;">
-            <img src="assets/bell.png" class="bell-icon" title="Task is due/overdue!" width="22" height="22" />
-            <button class="dismiss-btn" (click)="dismissReminder(task)">Dismiss</button>
+          <span
+            *ngIf="!task.done && task.deadline"
+            style="margin-left: 8px; cursor: pointer;"
+            [title]="task.notification ? 'Enable notification' : 'Dismiss notification'"
+            (click)="$event.stopPropagation(); toggleReminder(task)">
+            <i
+              [class.fa-bell]="!task.notification"
+              [class.fa-bell-slash]="task.notification"
+              class="fa-regular bell-icon"
+              [style.color]="isDarkMode ? 'white' : 'black'"
+              style="font-size: 22px;"
+            ></i>
           </span>
 
-          <button
-            (click)="showModal(i)" 
-            style="cursor: pointer; background: none; border: none; color: #007bff; font-size: 1rem;"
-          >
-            ✏️ Edit
-          </button>
-
-          <div *ngIf="task.deadline">
+          <div *ngIf="task.deadline" style="margin-top: 0.2rem;">
             <span
               class="deadline"
-              [ngClass]="{
-                overdue: isOverdue(task.deadline),
-                'due-today': isDueToday(task.deadline)
-              }"
-            >
-              Due: {{ task.deadline }}
-            </span>
+              [class.completed]="areAllRemindersNotified(task)"
+              [ngClass]="{ overdue: isOverdue(task.deadline), 'due-today': isDueToday(task.deadline) }"style="cursor: default;"
+              >Due: {{ task.deadline | date: 'dd-MM-yyyy' }}</span>
           </div>
 
-          <div class="description">{{ task.description || '' }}</div>
+          <div
+            class="description"
+            [class.completed]="areAllRemindersNotified(task)"
+            style="margin-top: 0.25rem; font-size: 0.9rem; color: var(--text);"
+          >
+            {{ task.description || '' }}
+          </div>
         </div>
 
-        <span class="trash" (click)="deleteTask(i)">🗑️</span>
+        <div
+          style="display: flex; flex-direction: column; gap: 10px; align-items: center; margin-left: auto; cursor: pointer; min-width: 36px;" >
+          <i
+            class="fa-solid fa-pen-to-square edit-icon"
+            (click)="$event.stopPropagation(); showModal(i)"
+            [style.color]="isDarkMode ? 'white' : 'black'"
+            title="Edit task"
+            style="font-size: 1.3rem;"
+          ></i>
+          <i
+            class="fa-solid fa-trash trash-icon"
+            (click)="$event.stopPropagation(); deleteTask(task)"
+            [style.color]="isDarkMode ? 'white' : 'black'"
+            title="Delete task"
+            style="font-size: 1.4rem;"
+          ></i>
+        </div>
       </li>
     </ul>
 
-    <div class="modal" [ngStyle]="{ display: isModalOpen ? 'flex' : 'none' }"> 
+    <div class="modal" [ngStyle]="{ display: isModalOpen ? 'flex' : 'none' }">
       <div class="modal-content">
         <h3 style="text-align: center;">
           {{ editTaskIndex !== null ? 'Edit Task' : 'New Task' }}
@@ -120,46 +139,125 @@
           id="modalTaskInput"
           placeholder="Enter task title..."
           maxlength="37"
-          [(ngModel)]="modalTask.name"
-        />
+          [(ngModel)]="modalTask.name"/>
 
         <textarea
           id="modalDescription"
           placeholder="Optional description (max 180 words)..."
           maxlength="190"
-          [(ngModel)]="modalTask.description"
-        ></textarea>
+          [(ngModel)]="modalTask.description">
+        </textarea>
 
         <div style="margin-top: 0.5rem;">
-          <label for="modalDeadline">Deadline:</label>
+          <label
+            for="modalDeadline"
+            style="display: inline-block; font-weight: bold; font-size: 1rem; margin-bottom: 0.25rem;"
+            >Deadline:</label>
           <input
             type="date"
             id="modalDeadline"
             [(ngModel)]="modalTask.deadline"
-          />
+            [min]="minDate"
+            style="
+              width: 100%;
+              height: 2.5rem;
+              font-size: 1rem;
+              padding: 0 0.5rem;
+              box-sizing: border-box;
+              margin: 0; "/>
+        </div>
 
-          <div style="margin-top: 0.5rem;">
-            <label for="reminderFrequency">Reminder alert:</label>
-            <select id="reminderFrequency" [(ngModel)]="modalTask.reminderFrequency">
-              <option value="once">Once (on deadline)</option>
-              <option value="daily">Daily until done</option>
-              <option value="weekly">Weekly until done</option>
-              <option value="none">No reminder</option>
-            </select>
+        <div style="margin-top: 1rem;">
+          <label
+            for="modalReminder"
+            style="display: inline-block; font-weight: bold; font-size: 1rem; margin-bottom: 0.25rem;"
+            >Reminder:</label>
+          <div
+            *ngFor="let reminder of modalTask.reminders; let idx = index"
+            style="display: flex; align-items: center; gap: 0.5rem; margin-top: 0.5rem;">
+            <input
+              type="datetime-local"
+              [(ngModel)]="modalTask.reminders[idx]"
+              [min]="minDateTime"
+              style="
+                flex: 1;
+                height: 2.5rem;
+                font-size: 1rem;
+                padding: 0 0.5rem;
+                box-sizing: border-box;
+                margin: 0; "/>
+            <button
+              type="button"
+              (click)="modalTask.reminders.splice(idx, 1)"
+              title="Remove reminder"
+              style="
+                cursor: pointer;
+                height: 2.5rem;
+                width: 2.5rem;
+                padding: 0;
+                margin: 0;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 1.5rem;
+                color: red;
+                background: transparent;
+                border: none;
+                user-select: none; " >
+              <i class="fa-solid fa-minus"></i>
+            </button>
           </div>
 
+          <div
+            style="display: flex; align-items: center; gap: 0.5rem; margin-top: 0.5rem;">
+            <input
+              #newReminder
+              type="datetime-local"
+              [min]="minDateTime"
+              style="
+                flex: 1;
+                height: 2.5rem;
+                font-size: 1rem;
+                padding: 0 0.5rem;
+                box-sizing: border-box;
+                margin: 0;"/>
 
-          <button (click)="closeModal()">Cancel</button>
-          <button 
+            <button
+              type="button"
+              (click)="addReminder(newReminder.value); newReminder.value='';"
+              title="Add reminder"
+              style="
+                cursor: pointer;
+                height: 2.5rem;
+                width: 2.5rem;
+                padding: 0;
+                margin: 0;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 1.5rem;
+                color: green;
+                background: transparent;
+                border: none;
+                user-select: none;" >
+              <i class="fa-solid fa-plus"></i>
+            </button>
+          </div>
+        </div>
+
+        <div style="display: flex; gap: 0.5rem; justify-content: center; margin-top: 1rem;">
+          <button type="button" (click)="closeModal()" style="flex: 1; padding: 0.5rem 1rem; font-size: 1rem;"> Cancel
+          </button>
+          <button
+            type="button"
             (click)="submitTask()"
             [ngStyle]="{
-              'background-color': (modalTask.name.trim() && modalTask.deadline) ? '#000' : '#ccc',
-              'color': (modalTask.name.trim() && modalTask.deadline) ? '#fff' : '#888',
-              'cursor': (modalTask.name.trim() && modalTask.deadline) ? 'pointer' : 'not-allowed'
-             }"
-          > 
+              'background-color': modalTask.name.trim() && modalTask.deadline ? '#000' : '#ccc',
+              color: modalTask.name.trim() && modalTask.deadline ? '#fff' : '#888',
+              cursor: modalTask.name.trim() && modalTask.deadline ? 'pointer' : 'not-allowed' }"
+            style="flex: 1; padding: 0.5rem 1rem; font-size: 1rem;" >
             {{ editTaskIndex !== null ? 'Save' : 'Add' }}
-          </button>
+         </button>
         </div>
       </div>
     </div>

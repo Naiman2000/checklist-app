@@ -132,6 +132,16 @@ body.dark #submitTaskBtn {
   cursor: pointer;
 }
 
+.alert {
+  font-size: 0.85rem;
+  margin-left: 0;
+  font-weight: bold;
+  padding: 0 0.3rem;
+  border-radius: 4px;
+  display: inline-block;
+  cursor: pointer;
+}
+
 .overdue {
   background-color: #f44336;
   color: white;
@@ -152,10 +162,11 @@ li {
   margin: 0.5rem 0;
   padding: 0.5rem;
   display: flex;
-  flex-direction: column;
   gap: 0.25rem;
   justify-content: space-between;
+  align-items: flex-start; /* align children to top */
 }
+
 
 li span:first-child {
   font-weight: bold;
@@ -165,6 +176,7 @@ li span:first-child {
 .completed {
   text-decoration: line-through;
   color: gray;
+  opacity: 0.7;
 }
 
 .trash {
@@ -234,18 +246,44 @@ li span:first-child {
   vertical-align: middle;
   margin-right: 4px;
   margin-top: -2px;
+  cursor: pointer;
 }
 
-.dismiss-btn {
-  margin-left: 5px;
-  background: transparent;
-  border: none;
-  color: #999;
-  cursor: pointer;
-  font-size: 0.92em;
-  padding: 0 4px;
+.reminders-section {
+  label {
+    font-weight: bold;
+    display: block;
+    margin-bottom: 0.3rem;
+  }
+
+  input[type="time"] {
+    padding: 4px 6px;
+  }
+
+.reminder-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+
+  input[type='datetime-local'] {
+    height: 2.5rem;
+    padding: 0 0.5rem;
+    font-size: 1rem;
+  }
+
+  button {
+    cursor: pointer;
+    font-size: 1.3em;
+    padding: 0.25rem 0.5rem;
+    height: 2.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
 }
-.dismiss-btn:hover {
-  color: #d00;
-  text-decoration: underline;
+
+  button:hover {
+    background-color: #0056b3;
+  }
 }
