@@ -358,7 +358,7 @@ startDueTaskChecker() {
         }
       }
     });
-  }, 15000); 
+  }, 3000); 
 }
 
   sendDueNotification(task: Task) {
