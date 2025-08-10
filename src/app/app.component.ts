@@ -60,7 +60,6 @@ isPastDateTime(dateTimeStr: string): boolean {
   return dateTime.getTime() < now.getTime();
 }
 
-
   loadTasks(): void {
     const tasksCollection = collection(this.firestore, 'tasks');
     collectionData(tasksCollection, { idField: 'id' }).subscribe((data) => {
@@ -68,10 +67,8 @@ isPastDateTime(dateTimeStr: string): boolean {
       this.selectedTasks.clear();
 
       this.tasks.forEach(task => {
-        if (task.reminders && task.notifiedReminders) {
-          task.notification = task.reminders.length === task.notifiedReminders.length;
-        } else {
-          task.notification = false; 
+        if (task.notification === undefined || task.notification === null) {
+          task.notification = false;
         }
       });
     });
@@ -150,7 +147,7 @@ async submitTask(): Promise<void> {
     deadline,
     reminders: this.modalTask.reminders,
     notifiedReminders: [],
-    notification: false,
+    notification: true,
   };
 
   try {
@@ -312,18 +309,7 @@ startDueTaskChecker() {
     const now = new Date();
 
     this.tasks.forEach(async (task) => {
-      if (!task.done && task.deadline && this.isPastDeadline(task.deadline)) {
-        task.done = true;
-        task.notification = true;
-
-        if (task.id) {
-          const taskRef = doc(this.firestore, `tasks/${task.id}`);
-          await updateDoc(taskRef, {
-            done: true,
-            notification: true,
-          });
-        }
-      }
+      if (!task.notification) return;
 
       if (task.done) return; 
       if (!task.reminders?.length) return;
@@ -336,7 +322,7 @@ startDueTaskChecker() {
         const reminderDate = new Date(reminderStr);
         const diffMs = now.getTime() - reminderDate.getTime();
 
-        if (diffMs >= 0 && diffMs < 60000) {
+        if (diffMs >= 0 && diffMs < 3000) {
           this.sendDueNotification(task);
           task.notifiedReminders.push(reminderStr);
 
@@ -382,18 +368,12 @@ startDueTaskChecker() {
     if (!task.notifiedReminders) task.notifiedReminders = [];
     if (!task.reminders) task.reminders = [];
 
-    if (task.notification) {
-      task.notifiedReminders = [];
-      task.notification = false;
-    } else {
-      task.notifiedReminders = [...task.reminders];
-      task.notification = true;
-    }
+    task.notification = !task.notification;
 
     if (task.id) {
       const taskRef = doc(this.firestore, `tasks/${task.id}`);
       await updateDoc(taskRef, {
-        notifiedReminders: task.notifiedReminders,
+
         notification: task.notification,
       });
     }

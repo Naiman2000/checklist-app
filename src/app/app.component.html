@@ -80,11 +80,11 @@
           <span
             *ngIf="!task.done && task.deadline"
             style="margin-left: 8px; cursor: pointer;"
-            [title]="task.notification ? 'Enable notification' : 'Dismiss notification'"
+            [title]="task.notification ? 'Dismiss notification' : 'Enable notification'"
             (click)="$event.stopPropagation(); toggleReminder(task)">
             <i
-              [class.fa-bell]="!task.notification"
-              [class.fa-bell-slash]="task.notification"
+              [class.fa-bell]="task.notification"
+              [class.fa-bell-slash]="!task.notification"
               class="fa-regular bell-icon"
               [style.color]="isDarkMode ? 'white' : 'black'"
               style="font-size: 22px;"
