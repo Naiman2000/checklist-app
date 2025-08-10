@@ -6,7 +6,7 @@ interface Task {
   name: string;
   description: string;
   done: boolean;
-  category: string;
+  category?: string;
   deadline?: string;
   notification?: boolean;         
   reminders?: string[];           
@@ -28,6 +28,7 @@ export class AppComponent implements OnInit {
   modalTask = {
     name: '',
     description: '',
+    category: '',
     deadline: '',
     reminders: [] as string[],
   };
@@ -76,24 +77,24 @@ isPastDateTime(dateTimeStr: string): boolean {
     });
   }
 
-  showModal(editIndex: number | null = null): void {
-    if (editIndex === null && this.currentCategory === 'All') {
+  showModal(task?: Task): void {
+    if (!task && this.currentCategory === 'All') {
       alert(`Please select either 'Personal' or 'Work' tab to add a new task.`);
       return;
     }
     this.isModalOpen = true;
-    if (editIndex !== null) {
-      this.editTaskIndex = editIndex;
-      const task = this.tasks[editIndex];
+    if (task) {
+      this.editTaskIndex = this.tasks.findIndex(t => t.id === task.id);
       this.modalTask = {
         name: task.name,
         description: task.description,
+        category: task.category || '',
         deadline: task.deadline || '',
         reminders: task.reminders ? [...task.reminders] : [],
       };
     } else {
       this.editTaskIndex = null;
-      this.modalTask = { name: '', description: '', deadline: '', reminders: [] };
+      this.modalTask = { name: '', description: '', category: this.currentCategory === 'All' ? '' : this.currentCategory, deadline: '', reminders: [] };
     }
   }
 

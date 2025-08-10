@@ -112,7 +112,7 @@
           style="display: flex; flex-direction: column; gap: 10px; align-items: center; margin-left: auto; cursor: pointer; min-width: 36px;" >
           <i
             class="fa-solid fa-pen-to-square edit-icon"
-            (click)="$event.stopPropagation(); showModal(i)"
+            (click)="$event.stopPropagation(); showModal(task)"
             [style.color]="isDarkMode ? 'white' : 'black'"
             title="Edit task"
             style="font-size: 1.3rem;"
