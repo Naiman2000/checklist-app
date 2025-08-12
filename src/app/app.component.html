@@ -23,10 +23,17 @@
     </div>
 
     <hr class="task-section-divider" />
+    <!--Search box code-->
     <div class="input-group" style="display: flex; gap: 0.5rem;">
-      <input placeholder="Add a new task" disabled style="flex: 1" />
+      <input
+        type="text"
+        placeholder="SEARCH TASKS..."
+        [(ngModel)]="searchQuery"
+        style="flex: 1"
+      />
       <button id="addBtn" (click)="showModal()">Add</button>
     </div>
+    <!--Search box code end-->
 
     <hr class="task-section-divider" />
     <div style="margin: 0.5rem 0; display: flex; flex-direction: column; align-items: flex-start;">

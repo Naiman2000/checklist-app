@@ -287,3 +287,17 @@ li span:first-child {
     background-color: #0056b3;
   }
 }
+
+.input-group input[type="text"]{
+  padding: 0.5rem;
+  border: 1px solid var(--border);
+  border-radius: 5px;
+  outline: none;
+  color: var(--text);
+  background: var(--box);
+  transition: border 0.2s;
+}
+
+.input-group input[type="text"]:focus {
+  border: 1.5px solid #888;
+}

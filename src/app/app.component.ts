@@ -10,7 +10,7 @@ interface Task {
   deadline?: string;
   notification?: boolean;         
   reminders?: string[];           
-  notifiedReminders?: string[];    
+  notifiedReminders?: string[];
 }
 
 @Component({
@@ -24,7 +24,7 @@ export class AppComponent implements OnInit {
   currentCategory: string = 'All';
   editTaskIndex: number | null = null;
   categories = ['All', 'Personal', 'Work'];
-
+  
   modalTask = {
     name: '',
     description: '',
@@ -36,6 +36,10 @@ export class AppComponent implements OnInit {
   isModalOpen = false;
   isDarkMode = false;
   selectedTasks: Set<string> = new Set();
+
+  //----New code for search box---
+  searchQuery: string = '';
+  //------------------------------
 
   constructor(private firestore: Firestore) {}
 
@@ -193,10 +197,20 @@ async submitTask(): Promise<void> {
   }
 
   filteredTasks(): Task[] {
-    if (this.currentCategory === 'All') return this.tasks;
-    return this.tasks.filter((task) => task.category === this.currentCategory);
-  }
+    let tasks = this.currentCategory === 'All'
+    ? this.tasks
+    : this.tasks.filter((task) => task.category === this.currentCategory);
 
+    if (this.searchQuery && this.searchQuery.trim() !== ''){
+      const q = this.searchQuery.trim().toLowerCase();
+      tasks = tasks.filter(task=>
+        task.name.toLowerCase().includes(q) ||
+        (task.description && task.description.toLowerCase().includes(q))
+      );
+    }
+    return tasks;
+  }
+  
   toggleDarkMode(): void {
     this.isDarkMode = !this.isDarkMode;
   }
