@@ -63,7 +63,7 @@
     <hr class="task-section-divider" />
     <ul id="taskList">
       <li
-        *ngFor="let task of filteredTasks(); let i = index"
+        *ngFor="let task of filteredTasks(); let i = index" @listItem
         style="display: flex; justify-content: space-between; align-items: flex-start; padding: 0.75rem 0;">
         <input
           type="checkbox"
@@ -135,8 +135,8 @@
       </li>
     </ul>
 
-    <div class="modal" [ngStyle]="{ display: isModalOpen ? 'flex' : 'none' }">
-      <div class="modal-content">
+    <div class="modal" *ngIf="isModalOpen" @modalBackdrop (click)="closeModal()">
+      <div class="modal-content" @modalPanel (click)="$event.stopPropagation()">
         <h3 style="text-align: center;">
           {{ editTaskIndex !== null ? 'Edit Task' : 'New Task' }}
         </h3>

@@ -195,7 +195,7 @@ li span:first-child {
   background-color: rgba(0, 0, 0, 0.5);
   justify-content: center;
   align-items: center;
-  display: none; 
+  display: flex; 
 }
 
 .modal[style*="display: flex"] {
@@ -315,3 +315,15 @@ li span:first-child {
   color: #fff;
   opacity: 0.7;
 }
+
+.modal-backdrop {
+  position: fixed; inset: 0; background: rgba(0,0,0,0.45);
+}
+.modal-panel {
+  position: fixed; inset: 0;
+  display: grid; place-items: center;
+  // inner panel wrapper if you have one: give it a border-radius/shadow
+}
+
+/* Micro-interaction for the “done” tick (if you have a checkbox icon) */
+.task-card .done-toggle:active { transform: scale(0.95); transition: transform 80ms; }

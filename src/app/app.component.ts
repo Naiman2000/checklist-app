@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { Firestore, collection, collectionData, addDoc, updateDoc, deleteDoc, doc } from '@angular/fire/firestore';
+import { trigger, transition, style, animate } from '@angular/animations';
 
 interface Task {
   id?: string;
@@ -17,6 +18,37 @@ interface Task {
   selector: 'app-root',
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.scss'],
+  animations: [
+    trigger('modalBackdrop', [
+      transition(':enter', [
+        style({ opacity: 0 }),
+        animate('150ms ease-out', style({ opacity: 1 })),
+      ]),
+      transition(':leave', [
+        animate('120ms ease-in', style({ opacity: 0 })),
+      ]),
+    ]),
+
+    trigger('modalPanel', [
+      transition(':enter', [
+        style({ transform: 'scale(0.97)', opacity: 0 }),
+        animate('160ms cubic-bezier(.2,.8,.2,1)', style({ transform: 'scale(1)', opacity: 1 })),
+      ]),
+      transition(':leave', [
+        animate('120ms cubic-bezier(.4,0,1,1)', style({ transform: 'scale(0.98)', opacity: 0 })),
+      ]),
+    ]),
+
+    trigger('listItem', [
+      transition(':enter', [
+        style({ transform: 'translateY(6px)', opacity: 0 }),
+        animate('180ms ease-out', style({ transform: 'translateY(0)', opacity: 1 })),
+      ]),
+      transition(':leave', [
+        animate('140ms ease-in', style({ transform: 'translateY(-6px)', opacity: 0 })),
+      ]),
+    ]),
+  ],
 })
 export class AppComponent implements OnInit {
   title = 'checklist-app';
