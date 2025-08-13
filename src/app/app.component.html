@@ -155,6 +155,22 @@
           [(ngModel)]="modalTask.description">
         </textarea>
 
+        <!-- Category (only shown when current tab is All) -->
+         <div *ngIf="currentCategory === 'All'" style="margin-top: 0.5rem;">
+          <label style="display:inline-block; font-weight: bold; font-size: 1rem; margin-bottom: 0.25rem;">
+            Category:
+          </label>
+          <div style="display:flex; gap:1rem; align-items:center;">
+            <label style="display:flex; gap:0.4rem; align-items:center;">
+              <input type="radio" name="modalCategory" value="Personal" [(ngModel)]="modalTask.category"> Personal
+            </label>
+            <label style="display:flex; gap:0.4rem; align-items:center;">
+              <input type="radio" name="modalCategory" value="Work" [(ngModel)]="modalTask.category"> Work
+            </label>
+          </div>
+        </div>
+
+
         <div style="margin-top: 0.5rem;">
           <label
             for="modalDeadline"

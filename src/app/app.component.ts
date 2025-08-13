@@ -78,32 +78,45 @@ isPastDateTime(dateTimeStr: string): boolean {
     });
   }
 
-  showModal(task?: Task): void {
-    if (!task && this.currentCategory === 'All') {
-      alert(`Please select either 'Personal' or 'Work' tab to add a new task.`);
-      return;
-    }
-    this.isModalOpen = true;
-    if (task) {
-      this.editTaskIndex = this.tasks.findIndex(t => t.id === task.id);
-      this.modalTask = {
-        name: task.name,
-        description: task.description,
-        category: task.category || '',
-        deadline: task.deadline || '',
-        reminders: task.reminders ? [...task.reminders] : [],
-      };
-    } else {
-      this.editTaskIndex = null;
-      this.modalTask = { name: '', description: '', category: this.currentCategory === 'All' ? '' : this.currentCategory, deadline: '', reminders: [] };
-    }
+  showModal(task?: Task) {
+  if (task) {
+    this.editTaskIndex = this.tasks.findIndex(t => t.id === task.id);
+    this.modalTask = {
+      name: task.name || '',
+      description: task.description || '',
+      category: task.category as 'Personal' | 'Work',
+      deadline: task.deadline || '',
+      reminders: (task.reminders || []).slice(),
+    };
+  } else {
+    this.editTaskIndex = null;
+    this.modalTask = {
+      name: '',
+      description: '',
+      category: this.currentCategory === 'All' ? '' as any : (this.currentCategory as 'Personal' | 'Work'),
+      deadline: '',
+      reminders: [],
+    };
   }
+  this.isModalOpen = true;
+}
+
 
   closeModal(): void {
     this.isModalOpen = false;
   }
 
 async submitTask(): Promise<void> {
+  const categoryToUse =
+  this.currentCategory === 'All'
+  ? (this.modalTask.category as 'Personal' | 'Work')
+  : (this.currentCategory as 'Personal' | 'Work');
+  
+  if (!categoryToUse) {
+    alert('Please choose Personal or Work.');
+    return;
+  }
+
   const name = this.modalTask.name.trim();
   const description = this.modalTask.description || '';
   const deadline = this.modalTask.deadline || '';
@@ -147,7 +160,7 @@ async submitTask(): Promise<void> {
     name,
     description,
     done: false,
-    category: this.currentCategory === 'All' ? 'Personal' : this.currentCategory,
+    category: categoryToUse,
     deadline,
     reminders: this.modalTask.reminders,
     notifiedReminders: [],
